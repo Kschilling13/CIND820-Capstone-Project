@@ -1,0 +1,61 @@
+---
+title: "Covid Cases - EDA"
+author: "Katie Schilling - 501130072"
+date: "07/02/2022"
+output: html_document
+---
+Required tools to be loaded
+```{r}
+library(dlookr)
+library(lubridate)
+library(data.table)
+library(dplyr)
+library(moments)
+library(ggpubr)
+library(smooth)
+library(greybox)
+library(forecast)
+library(funModeling)
+```
+
+Import dataset in regards to COVID-19
+```{r}
+Covid_monthly <- read.csv("C:/Users/Katie Schilling/Downloads/covid_monthly_clean.csv")
+```
+
+View the data to see what information is present
+```{r}
+head(Covid_monthly)
+```
+
+Check for any missing values
+```{r}
+sum(is.na(Covid_monthly))
+```
+Create function to view basic EDA
+```{r}
+basic_eda <- function(data)
+{
+  glimpse(data)
+  print(status(data))
+  freq(data) 
+  print(profiling_num(data))
+  plot_num(data)
+  describe(data)
+}  
+```
+
+
+produce and view the results of the EDA function
+```{r}
+basic_eda(Covid_monthly)
+```
+
+Visual analysis of the normality of the data.  
+```{r}
+plot_normality(Covid_monthly )
+```
+
+```{r}
+eda_web_report(Covid_monthly)
+```
