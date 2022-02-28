@@ -1,0 +1,104 @@
+---
+title: "Vital Events Pre-Processing"
+author: "Katie Schilling - 501130072"
+date: "07/02/2022"
+output: html_document
+---
+Required tools to be loaded
+```{r}
+library(dlookr)
+library(lubridate)
+library(data.table)
+library(dplyr)
+library(moments)
+library(ggpubr)
+library(smooth)
+library(greybox)
+library(forecast)
+library(funModeling)
+```
+
+Import the first data set
+```{r}
+Vital_events<- read.csv("C:/Users/Katie Schilling/Downloads/vital_events_data_by_month_1994-2021_q2 (1).csv", header = TRUE)
+## Change the column names to cleaner versions
+colnames(Vital_events)<- c("Month","Year","Live Births", "Marriages","Deaths","Stillbirths")
+```
+
+View the data to see what information is present
+```{r}
+head(Vital_events)
+```
+
+Clean up of the vitals Data event.  Removal of the french version of the month, as many of them did not import properly.  Makes the data easier to read, view and work with.
+
+```{r}
+Vital_events[Vital_events == "January/janvier"] <- "January"
+Vital_events[Vital_events == "February/fÃ©vrier"] <- "February"
+Vital_events[Vital_events == "March/mars"] <- "March"
+Vital_events[Vital_events == "April/avril"] <- "April"
+Vital_events[Vital_events == "May/mai"] <- "May"
+Vital_events[Vital_events == "June/juin"] <- "June"
+Vital_events[Vital_events == "July/juillet"] <- "July"
+Vital_events[Vital_events == "August/aoÃ»t"] <- "August"
+Vital_events[Vital_events == "September/septembre"] <- "September"
+Vital_events[Vital_events == "October/octobre"] <- "October"
+Vital_events[Vital_events == "November/novembre"] <- "November"
+Vital_events[Vital_events == "December/dÃ©cembre"] <- "December"
+```
+
+
+Check data now to see if the changes are sufficent
+```{r}
+head(Vital_events)
+```
+
+Convert the month names to the corresponding month number
+
+```{r}
+Vital_events <- Vital_events
+Vital_events["Month"][Vital_events["Month"]== "January"]  <- 01
+Vital_events["Month"][Vital_events["Month"]== "February"]  <- 02
+Vital_events["Month"][Vital_events["Month"]== "March"]  <- 03
+Vital_events["Month"][Vital_events["Month"]== "April"]  <- 04
+Vital_events["Month"][Vital_events["Month"]== "May"]  <- 05
+Vital_events["Month"][Vital_events["Month"]== "June"]  <- 06
+Vital_events["Month"][Vital_events["Month"]== "July"]  <- 07
+Vital_events["Month"][Vital_events["Month"]== "August"]  <-  08
+Vital_events["Month"][Vital_events["Month"]== "September"]  <- 09
+Vital_events["Month"][Vital_events["Month"]== "October"]  <- 10
+Vital_events["Month"][Vital_events["Month"]== "November"]  <- 11
+Vital_events["Month"][Vital_events["Month"]== "December"]  <- 12
+```
+
+Change the Year and Month columns to numeric values, and then create a column with the 2 values combined in the proper Month and Year format.  Assigned day to the 1st day of each month so that I had a full date to work with
+```{r}
+Vital_events$Month <- as.numeric(Vital_events$Month)
+Vital_events$Year <- as.numeric(Vital_events$Year)
+Vital_events$Date <- sprintf("%d-%02d-%s", Vital_events$Year, Vital_events$Month, "1")
+```
+
+Re-order Final dataset so that date is the first column and sort by date
+```{r}
+Vital_events <- Vital_events[c(7, 3:6)]
+Vital_events <- Vital_events[order(Vital_events$Date),]
+
+```
+
+View Cleaned Data Set
+```{r}
+describe(Vital_events)
+```
+
+
+```{r}
+summary(Vital_events)
+
+
+```
+Export CLeaned Dataset
+```{r}
+
+write.csv(Vital_events,"C:/Users/Katie Schilling/Downloads/vital_events_clean.csv", row.names = FALSE)
+```
+
