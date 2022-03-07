@@ -1,0 +1,131 @@
+---
+title: "Granger Causality Test"
+author: "Katie Schilling - 501130072"
+date: "07/02/2022"
+output: html_document
+---
+Required tools to be loaded
+```{r}
+library(dplyr)
+require(lmtest)
+
+```
+
+Import bothe Clean datasets
+```{r}
+Covid_monthly <- read.csv("C:/Users/Katie Schilling/Downloads/covid_monthly_clean.csv")
+Vital_Events <- read.csv("C:/Users/Katie Schilling/Downloads/vital_events_clean.csv")
+
+```
+
+Combine the vital events data with the Covid Monthly data
+```{r}
+Final_dataset <- merge(x=Vital_Events, y=Covid_monthly, all = TRUE)
+```
+
+Check the data and ensure data merged properly
+```{r}
+summary(Final_dataset)
+```
+
+Change the N/A in the Covid Positive Cases to 0 so that the data is not omitted from the predictions
+```{r}
+Final_dataset$Covid[is.na(Final_dataset$Covid)] = 0
+```
+
+See if there are anymore NA's in the dataset
+```{r}
+Final_dataset %>% filter_all(any_vars(is.na(.))) 
+```
+Remove rows with NA as they will skew the results
+```{r}
+Final_dataset <- na.omit(Final_dataset)
+```
+
+Check for NA's to confirm all have been removed
+```{r}
+Final_dataset %>% filter_all(any_vars(is.na(.))) 
+```
+```{r}
+summary(Final_dataset)
+```
+
+```{r}
+Final_dataset$Date <- as.Date(Final_dataset$Date,"%Y-%m-%d")
+
+```
+
+
+```{r}
+glimpse(Final_dataset)
+```
+
+
+Normalize the Data
+```{r}
+
+Final_dataset_standardized <- Final_dataset %>% mutate_each_(list(~scale(.) %>% as.vector),
+                                  vars = c("Births","Marriages","Deaths","Stillbirths","Covid"))
+
+```
+
+
+```{r}
+Final_ts <- ts(Final_dataset)
+```
+
+
+Running Granger Causality tests for each variable against each other variable one by one
+Previous Granger test showed one variable against all others did not show causality, so now determining if one variable against each
+other variable individually shows causality.
+
+Covid vs. Deaths Causality
+```{r}
+grangertest(Covid ~ Deaths, order =12, data = Final_ts)
+```
+
+Covid vs. Marriages Causality
+```{r}
+grangertest(Covid ~ Marriages, order =12, data = Final_ts)
+```
+
+Covid vs. Stillbirths Causality
+```{r}
+grangertest(Covid ~ Stillbirths, order =12, data = Final_ts)
+```
+
+Covid vs. Births Causality
+```{r}
+grangertest(Covid ~ Births, order =12, data = Final_ts)
+```
+
+Deaths vs. Marriages Causality
+```{r}
+grangertest(Deaths ~ Marriages, order =12, data = Final_ts)
+```
+
+Deaths vs. Stillbirths Causality
+```{r}
+grangertest(Deaths ~ Stillbirths, order =12, data = Final_ts)
+```
+
+Deaths vs. Births Causality
+```{r}
+grangertest(Deaths ~ Births, order =12, data = Final_ts)
+```
+
+Births vs. Marriages Causality
+```{r}
+grangertest(Births ~ Marriages, order =12, data = Final_ts)
+```
+
+Births vs. Stillbirths Causality
+```{r}
+grangertest(Births ~ Stillbirths, order =12, data = Final_ts)
+```
+
+Marriages vs. Stillbirths Causality
+```{r}
+grangertest(Marriages ~ Stillbirths, order =12, data = Final_ts)
+```
+
