@@ -45,3 +45,7 @@ Running this test, with all variations, showed no direct causality for the major
 in this case can be rejected as the p-value is below 0.05
 Overall, there does not seem to be any strong correlations between the variables.
 
+**Linear test**
+comparing each variable against all others to create linerar models
+
+Initial results do show that there was a direct impact to the variables with the introduction of the public health crisis that we are in, when comparing predicted values vs actual values
