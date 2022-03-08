@@ -63,3 +63,8 @@ Overall, there does not seem to be any strong correlations between the variables
 comparing each variable against all others to create linerar models
 
 Initial results do show that there was a direct impact to the variables with the introduction of the public health crisis that we are in, when comparing predicted values vs actual values
+
+**Additional Results**
+linear regression for each variable against all other variables
+time series of each variable, including decomposition
+
