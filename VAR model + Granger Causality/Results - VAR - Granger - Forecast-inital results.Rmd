@@ -1,0 +1,373 @@
+---
+title: "VAR analysis - Granger-Causality-Initial Comparisons"
+author: "Katie Schilling - 501130072"
+date: "07/02/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+Required tools to be loaded
+```{r}
+library(dlookr)
+library(lubridate)
+library(dplyr)
+library(ggpubr)
+library(forecast)
+library(funModeling)
+require(ggfortify)
+require(tseries)
+require(MTS)
+require(vars)
+require(fUnitRoots)
+require(lattice)
+
+```
+
+Import both Clean datasets
+```{r}
+Covid_monthly <- read.csv("C:/Users/Katie Schilling/Downloads/covid_monthly_clean.csv")
+Vital_Events <- read.csv("C:/Users/Katie Schilling/Downloads/vital_events_clean.csv")
+
+```
+
+Combine the vital events data with the Covid Monthly data
+```{r}
+Final_dataset <- merge(x=Vital_Events, y=Covid_monthly, all = TRUE)
+```
+
+Check the data and ensure data merged properly
+```{r}
+summary(Final_dataset)
+```
+
+Change the N/A in the Covid Positive Cases to 0 so that the data is not omitted from the predictions
+```{r}
+Final_dataset$Covid[is.na(Final_dataset$Covid)] = 0
+```
+
+See if there are anymore NA's in the dataset
+```{r}
+Final_dataset %>% filter_all(any_vars(is.na(.))) 
+```
+Remove rows with NA as they will skew the results
+```{r}
+Final_dataset <- na.omit(Final_dataset)
+```
+
+Check for NA's to confirm all have been removed
+```{r}
+Final_dataset %>% filter_all(any_vars(is.na(.))) 
+```
+```{r}
+summary(Final_dataset)
+```
+
+```{r}
+Final_dataset$Date <- as.Date(Final_dataset$Date,"%Y-%m-%d")
+
+```
+
+
+```{r}
+glimpse(Final_dataset)
+```
+
+
+Normalize the Data
+```{r}
+
+Final_dataset_standardized <- Final_dataset %>% mutate_each_(list(~scale(.) %>% as.vector),
+                                  vars = c("Births","Marriages","Deaths","Stillbirths","Covid"))
+
+```
+
+
+Convert data frame to a time series
+```{r}
+Final_dataset_TS <- ts(Final_dataset_standardized[2:6], frequency = 12, start = 1994, end = 2021)
+```
+
+```{r}
+plot(Final_dataset_TS)
+```
+
+```{r}
+xyplot.ts(Final_dataset_TS)
+```
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+decompose data and display results
+```{r}
+decomp <- decompose(Final_dataset_TS)
+plot(decomp$seasonal)
+plot(decomp$trend)
+plot(decomp$random)
+```
+
+
+```{r}
+Covid <- forecast(Final_dataset_TS[,5])
+plot(Covid, main = "Covid Forecast")
+
+```
+```{r}
+Stillbirths <- forecast(Final_dataset_TS[,4])
+plot(Stillbirths, main = "Stillbirths Forecast")
+
+```
+```{r}
+Deaths <- forecast(Final_dataset_TS[,3])
+plot(Deaths, main = "Deaths Forecast")
+
+```
+```{r}
+Marriages <- forecast(Final_dataset_TS[,2])
+plot(Marriages, main = "Marriages Forecast")
+
+```
+```{r}
+Births <- forecast(Final_dataset_TS[,1])
+plot(Births, main = "Births Forecast")
+
+```
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------VAR time series forecasting for multivarite
+
+```{r}
+apply(Final_dataset_TS, 2, adf.test)
+```
+
+
+```{r}
+plot.ts(Final_dataset_TS)
+```
+
+```{r}
+autoplot(ts(Final_dataset_TS,
+            start = c(1964,1),
+            frequency = 12)) +
+  ggtitle("Time Series Plot of the stationary `Final Dataset' Time-Series")
+```
+
+```{r}
+VARselect(Final_dataset_TS, 
+          type = "none", 
+          lag.max = 6) #highest lag order
+```
+
+```{r}
+# Creating a VAR model with vars
+final_ts_var <- vars::VAR(Final_dataset_TS,
+                   lag.max = 6, #highest lag order for lag length selection according to the choosen ic
+                   ic = "AIC", #information criterion
+                   type = "none") #type of deterministic regressors to include
+summary(final_ts_var)
+
+```
+
+```{r}
+serial.test(final_ts_var)
+```
+
+VAR model causality test for each variable against all other variables
+```{r}
+causality(final_ts_var, 
+          cause = c("Deaths"))
+
+```
+
+```{r}
+causality(final_ts_var,
+          cause = c("Births")) 
+
+```
+
+```{r}
+causality(final_ts_var, 
+          cause = c("Covid")) 
+
+```
+
+```{r}
+causality(final_ts_var, 
+          cause = c("Marriages"))  
+
+```
+
+```{r}
+causality(final_ts_var,
+          cause = c("Stillbirths"))
+
+```
+prediction for final dataset including covid
+```{r}
+fcast = predict(final_ts_var, n.ahead = 12, ci = 0.95) # predicting the 12 months after the data ends
+par(mar = c(2,2,2,2))
+plot(fcast)
+```
+
+
+
+forecast for final dataset including covid
+```{r}
+Final_forecast <- forecast(Final_dataset_TS, h=12 ) 
+par(mar = c(2,2,2,2))
+plot(Final_forecast)
+
+```
+
+
+```{r}
+accuracy(Final_forecast,d= NULL, D=NULL)
+
+```
+
+Create forecast for vital events excluding Covid to see if the introduction of covid had a large impact on the other variables
+
+```{r}
+Vital_Events$Date <- as.Date(Final_dataset$Date,"%Y-%m-%d")
+
+```
+
+
+```{r}
+glimpse(Vital_Events)
+```
+
+
+Normalize the Data
+```{r}
+
+Vital_Events_standardized <- Final_dataset %>% mutate_each_(list(~scale(.) %>% as.vector),
+                                  vars = c("Births","Marriages","Deaths","Stillbirths"))
+
+```
+
+Convert data frame to a time series up to 2019, so that I can compare predictions for 2021-2021 to actual observed numbers
+```{r}
+vital_events_TS <- ts(Vital_Events_standardized[2:5], frequency = 12, start = 1994, end = 2019)
+```
+
+
+```{r}
+plot(vital_events_TS)
+```
+
+```{r}
+xyplot.ts(vital_events_TS)
+```
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+decompose data and display results vital events without covid
+```{r}
+decomp <- decompose(vital_events_TS)
+plot(decomp$seasonal)
+plot(decomp$trend)
+plot(decomp$random)
+```
+
+Dicky-Fuller test
+```{r}
+apply(vital_events_TS, 2, adf.test)
+```
+```{r}
+autoplot(ts(vital_events_TS,
+            start = c(1994,1),
+            frequency = 12)) +
+  ggtitle("Time Series Plot of the stationary `Vital Events Dataset' Time-Series")
+```
+
+```{r}
+VARselect(vital_events_TS, 
+          type = "none", lag.max = 6) 
+```
+Creating a VAR model with vars
+```{r}
+
+vital_ts_var <- vars::VAR(vital_events_TS,
+                   lag.max = 6, 
+                   ic = "AIC", 
+                   type = "none") 
+summary(vital_ts_var)
+```
+
+```{r}
+causality(vital_ts_var, 
+          cause = c("Deaths"))
+
+```
+
+```{r}
+
+causality(vital_ts_var,
+          cause = c("Births")) 
+
+```
+
+
+```{r}
+
+causality(vital_ts_var, 
+          cause = c("Marriages"))  
+
+```
+
+```{r}
+
+causality(vital_ts_var,
+          cause = c("Stillbirths")) 
+
+```
+prediction of vital events without covid
+```{r}
+
+fcast2 = predict(vital_ts_var, n.ahead = 24) # predicting the 12 months after the data ends
+par(mar = c(2,2,2,2))
+plot(fcast2)
+
+
+```
+
+
+
+forecast for just the vital events, without covid
+```{r}
+vital_forecast <- forecast(vital_ts_var, h=24 ) #Forecasting 12 months ahead
+par(mar=c(5.1,4.1,4.1,2.1))
+autoplot(vital_forecast, alpha = 0.5)
+
+```
+checking accuracy of both forecasts
+```{r}
+accuracy(vital_forecast,d= NULL, D=NULL)
+accuracy(Final_forecast,d= NULL, D=NULL)
+```
+
+
+
+Create dataframes for both acutal values and predicted values for comparison
+This is for vital events only, without the introduction of Covid to see how the predicted compared, and how much
+variance there is between the 2 and the impact covid had on the actual numbers
+```{r}
+library(modelr)
+actuals <- as.data.frame(Final_dataset_standardized[1:5])
+
+actuals <- actuals[313:325,]
+
+
+
+predicted <- fortify(stats::predict(vital_ts_var, n.ahead = 24))
+predicted <- predicted[313:325,]
+predicted <- predicted[c(1,6,10,14,18)]
+colnames(predicted)<- c("Date","Births","Marriages","Deaths", "Stillbirths")
+
+plot(predicted)
+plot(actuals)
+
+```
+
+
+
