@@ -1,5 +1,11 @@
 # CIND820-Capstone-Project
 
+Reposity Contents
+1. Abstract
+2. EDA - analysis for each dataset - PDF version of both located in folder
+3. pre-processing - Both data sets - PDF version of both located in folder
+4. 
+
 Katie Schilling
 
 Every year the registrar general collects and releases information on vital events in Canada. Based on research, the vital events data is collected to monitor, and predict future population growth, marriages, deaths and stillborn births.  (https://www.statcan.gc.ca/en/about/relevant/vscc/faq)  
