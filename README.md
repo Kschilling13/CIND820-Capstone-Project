@@ -4,7 +4,10 @@ Reposity Contents
 1. Abstract
 2. EDA - analysis for each dataset - PDF version of both located in folder
 3. pre-processing - Both data sets - PDF version of both located in folder
-4. 
+4. Lit Review
+5. Granger Causality Tests - PDF version of both located in folder
+6. Vars model - grouped granger causality - predictions and forecasts - PDF version of both located in folder
+7. additional results - Individualized time series forecasts for each variable - PDF version of both located in folder
 
 Katie Schilling
 
