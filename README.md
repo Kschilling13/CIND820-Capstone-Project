@@ -2,6 +2,11 @@
 
 Katie Schilling
 
+Every year the registrar general collects and releases information on vital events in Canada. Based on research, the vital events data is collected to monitor, and predict future population growth, marriages, deaths and stillborn births.  (https://www.statcan.gc.ca/en/about/relevant/vscc/faq)  
+Much of this information can be used to determine what resources will be needed in the future, whether the population is increasing, decreasing, or holding steady, and foresee any public health trends emerging, as we have seen over the past 2 years with the introduction of COVID-19.  All of this information is important for understanding and maintain balance of our system as a whole.
+In addition to focusing on the births, deaths, marriages and stillborn births, I also want to introduce the number of positive COVID-19 cases, month over month.  The reason for this is to see if there is a direct correlation between the increase or decrease of these numbers and COVID-19, and what long term impact it may have on our growth or decline.
+
+
 **Step 1**
 Pre-processing.
 Both data sets required some form of pre-processing, or data clean up, whether it be cleaning up the column names, or narrowing down the dataset itself.
