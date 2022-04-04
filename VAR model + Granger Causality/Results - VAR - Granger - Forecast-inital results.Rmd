@@ -88,11 +88,25 @@ Final_dataset_TS <- ts(Final_dataset_standardized[2:6], frequency = 12, start = 
 ```
 
 ```{r}
-plot(Final_dataset_TS)
+plot(Final_dataset_TS[,1], ylab="", yaxt="n", col = "red", lwd = 2)
+title(main = "Births Timeseries", xlab = "Time", ylab = "Births")
+
+plot(Final_dataset_TS[,3], ylab="", yaxt="n", col = "red", lwd = 2)
+title(main = "Deaths Timeseries", xlab = "Time", ylab = "Deaths")
+
+plot(Final_dataset_TS[,2], ylab="", yaxt="n", col = "red", lwd = 2)
+title(main = "Marriages Timeseries", xlab = "Time", ylab = "Marriages")
+
+plot(Final_dataset_TS[,4], ylab="", yaxt="n", col = "red", lwd = 2)
+title(main = "Stillbirths Timeseries", xlab = "Time", ylab = "Stillbirths")
+
+plot(Final_dataset_TS[,5], ylab="", yaxt="n", col = "red", lwd = 2)
+title(main = "Covid Timeseries", xlab = "Time", ylab = "Covid")
+##ts.plot(Final_dataset_TS)
 ```
 
 ```{r}
-xyplot.ts(Final_dataset_TS)
+xyplot.ts(Final_dataset_TS[,1])
 ```
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -141,7 +155,7 @@ apply(Final_dataset_TS, 2, adf.test)
 
 
 ```{r}
-plot.ts(Final_dataset_TS)
+plot.ts(Final_dataset_TS, main= "Final Dataset Timeseries")
 ```
 
 ```{r}
@@ -328,7 +342,13 @@ fcast2 = predict(vital_ts_var, n.ahead = 24) # predicting the 12 months after th
 par(mar = c(2,2,2,2))
 plot(fcast2)
 
+fcast2
 
+fcast3 = predict(vital_ts_var, n.ahead = 12) # predicting the 12 months after the data ends
+par(mar = c(2,2,2,2))
+plot(fcast3)
+fcast3
+head(Final_dataset)
 ```
 
 
@@ -354,20 +374,75 @@ variance there is between the 2 and the impact covid had on the actual numbers
 ```{r}
 library(modelr)
 actuals <- as.data.frame(Final_dataset_standardized[1:5])
-
 actuals <- actuals[313:325,]
-
-
-
 predicted <- fortify(stats::predict(vital_ts_var, n.ahead = 24))
 predicted <- predicted[313:325,]
 predicted <- predicted[c(1,6,10,14,18)]
 colnames(predicted)<- c("Date","Births","Marriages","Deaths", "Stillbirths")
 
-plot(predicted)
-plot(actuals)
-
+covid_stand <-  Covid_monthly %>% mutate_each_(list(~scale(.) %>% as.vector),
+                                  vars = c("Covid"))
+covid_stand$Date <- as.Date(covid_stand$Date,"%Y-%m-%d")
+summary(covid_stand)
 ```
+
+
+Predicted vs Actuals Births
+```{r}
+ggplot() +
+
+      geom_point(data=predicted, aes(x=Date, y=Births, color="Predicted")) + 
+      geom_line(data=actuals, aes(x=Date, y=Births,color="Actuals"))  +
+      geom_line(data=covid_stand, aes(x = Date, y=Covid,color="Covid"))  +
+      ylim(-3,+2)+
+      labs(color='Legend', title = "Predicted vs. Actual Births + Covid I ntroduction")+
+      theme(legend.position = c("bottom"), plot.title = element_text(hjust = 0.5)) +
+      scale_x_date(limits = as.Date(c("2020-01-01","2021-01-01")))
+```
+Predicted vs Actuals Deaths
+```{r}
+ggplot() +
+
+      geom_point(data=predicted, aes(x=Date, y=Deaths, color="Predicted")) + 
+      geom_line(data=actuals, aes(x=Date, y=Deaths,color="Actuals"))  +
+      geom_line(data=covid_stand, aes(x = Date, y=Covid,color="Covid"))  +
+      ylim(-2,+4)+
+      labs(color='Legend', title = "Predicted vs. Actual Deaths + Covid Introduction")+ theme(legend.position = c("bottom"), plot.title = element_text(hjust = 0.5))+
+      scale_x_date(limits = as.Date(c("2020-01-01","2021-01-01")))
+```
+
+
+```{r}
+ggplot() +
+
+      geom_point(data=predicted, aes(x=Date, y=Marriages, color="Predicted")) + 
+      geom_line(data=actuals, aes(x=Date, y=Marriages,color="Actuals"))  +
+      geom_line(data=covid_stand, aes(x = Date, y=Covid,color="Covid"))  +
+      ylim(-2,+4)+
+      labs(color='Legend', title = "Predicted vs. Actual Marriages + Covid Introduction")+ theme(legend.position = c("bottom"), plot.title = element_text(hjust = 0.5))+
+      scale_x_date(limits = as.Date(c("2020-01-01","2021-01-01")))
+```
+```{r}
+ggplot() +
+
+      geom_point(data=predicted, aes(x=Date, y=Births, color="Predicted")) + 
+      geom_line(data=actuals, aes(x=Date, y=Births,color="Actuals"))  +
+      geom_line(data=covid_stand, aes(x = Date, y=Covid,color="Covid"))  +
+      ylim(-2,+4)+
+      labs(color='Legend', title = "Predicted vs. Actual Births + Covid Introduction")+ theme(legend.position = c("right"), plot.title = element_text(hjust = 0.5))+
+      scale_x_date(limits = as.Date(c("2020-01-01","2021-01-01")))
+```
+```{r}
+ggplot() +
+
+      geom_point(data=predicted, aes(x=Date, y=Stillbirths, color="Predicted")) + 
+      geom_line(data=actuals, aes(x=Date, y=Stillbirths,color="Actuals"))  +
+      geom_line(data=covid_stand, aes(x = Date, y=Covid,color="Covid"))  +
+      ylim(-2,+4)+
+      labs(color='Legend', title = "Predicted vs. Actual Stillbirths + Covid Introduction")+ theme(legend.position = c("bottom"), plot.title = element_text(hjust = 0.5))+
+      scale_x_date(limits = as.Date(c("2020-01-01","2021-01-01")))
+```
+
 
 
 
