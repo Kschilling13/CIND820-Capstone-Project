@@ -2,7 +2,9 @@
 title: "Granger Causality Test"
 author: "Katie Schilling - 501130072"
 date: "07/02/2022"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 Required tools to be loaded
 ```{r}
@@ -11,7 +13,7 @@ require(lmtest)
 
 ```
 
-Import bothe Clean datasets
+Import both Clean datasets
 ```{r}
 Covid_monthly <- read.csv("C:/Users/Katie Schilling/Downloads/covid_monthly_clean.csv")
 Vital_Events <- read.csv("C:/Users/Katie Schilling/Downloads/vital_events_clean.csv")
@@ -79,53 +81,64 @@ Running Granger Causality tests for each variable against each other variable on
 Previous Granger test showed one variable against all others did not show causality, so now determining if one variable against each
 other variable individually shows causality.
 
+
 Covid vs. Deaths Causality
 ```{r}
 grangertest(Covid ~ Deaths, order =12, data = Final_ts)
+grangertest(Deaths ~ Covid, order =12, data = Final_ts)
 ```
 
 Covid vs. Marriages Causality
 ```{r}
 grangertest(Covid ~ Marriages, order =12, data = Final_ts)
+grangertest(Marriages ~ Covid, order =12, data = Final_ts)
 ```
 
 Covid vs. Stillbirths Causality
 ```{r}
 grangertest(Covid ~ Stillbirths, order =12, data = Final_ts)
+grangertest(Stillbirths ~ Covid, order =12, data = Final_ts)
 ```
 
 Covid vs. Births Causality
 ```{r}
 grangertest(Covid ~ Births, order =12, data = Final_ts)
+grangertest(Births ~ Covid, order =12, data = Final_ts)
 ```
 
 Deaths vs. Marriages Causality
 ```{r}
 grangertest(Deaths ~ Marriages, order =12, data = Final_ts)
+grangertest(Marriages ~ Deaths, order =12, data = Final_ts)
 ```
 
 Deaths vs. Stillbirths Causality
 ```{r}
+grangertest(Stillbirths ~ Deaths, order =12, data = Final_ts)
 grangertest(Deaths ~ Stillbirths, order =12, data = Final_ts)
 ```
 
 Deaths vs. Births Causality
 ```{r}
 grangertest(Deaths ~ Births, order =12, data = Final_ts)
+grangertest(Births ~ Deaths, order =12, data = Final_ts)
 ```
 
 Births vs. Marriages Causality
 ```{r}
 grangertest(Births ~ Marriages, order =12, data = Final_ts)
+grangertest(Marriages ~ Births, order =12, data = Final_ts)
 ```
 
 Births vs. Stillbirths Causality
 ```{r}
 grangertest(Births ~ Stillbirths, order =12, data = Final_ts)
+grangertest(Stillbirths ~ Births, order =12, data = Final_ts)
 ```
 
 Marriages vs. Stillbirths Causality
 ```{r}
 grangertest(Marriages ~ Stillbirths, order =12, data = Final_ts)
+grangertest(Stillbirths ~ Marriages, order =12, data = Final_ts)
 ```
 
