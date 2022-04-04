@@ -1,0 +1,116 @@
+---
+title: "Combined Data EDA"
+author: "Katie Schilling - 501130072"
+date: "04/04/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r}
+library(readxl)
+library(caTools)
+library(dplyr)
+require(lmtest)
+library(dlookr)
+```
+
+Import bothe Clean datasets
+```{r}
+Covid_monthly <- read.csv("C:/Users/Katie Schilling/Downloads/covid_monthly_clean.csv")
+Vital_Events <- read.csv("C:/Users/Katie Schilling/Downloads/vital_events_clean.csv")
+
+```
+
+Combine the vital events data with the Covid Monthly data
+```{r}
+Final_dataset <- merge(x=Vital_Events, y=Covid_monthly, all = TRUE)
+```
+
+Check the data and ensure data merged properly
+```{r}
+summary(Final_dataset)
+```
+
+Change the N/A in the Covid Positive Cases to 0 so that the data is not omitted from the predictions
+```{r}
+Final_dataset$Covid[is.na(Final_dataset$Covid)] = 0
+```
+
+See if there are anymore NA's in the dataset
+```{r}
+Final_dataset %>% filter_all(any_vars(is.na(.))) 
+```
+Remove rows with NA as they will skew the results
+```{r}
+Final_dataset <- na.omit(Final_dataset)
+```
+
+Check for NA's to confirm all have been removed
+```{r}
+Final_dataset %>% filter_all(any_vars(is.na(.))) 
+```
+```{r}
+summary(Final_dataset)
+```
+
+```{r}
+Final_dataset$Date <- as.Date(Final_dataset$Date,"%Y-%m-%d")
+
+```
+
+
+```{r}
+glimpse(Final_dataset)
+```
+Create function to view basic EDA
+```{r}
+basic_eda <- function(data)
+{
+  glimpse(data)
+  print(status(data))
+  freq(data) 
+  print(profiling_num(data))
+  plot_num(data)
+  describe(data)
+}  
+```
+
+
+
+Visual analysis of the normality of the data.  
+```{r}
+plot_normality(Final_dataset)
+```
+
+Find the correlation, if any, between the variables in the data
+```{r}
+correlate(Final_dataset)
+```
+visualize the correlation, if any, of the data
+```{r}
+plot_correlate(Final_dataset)
+```
+
+```{r}
+hist(Final_dataset$Births)
+hist(Final_dataset$Deaths)
+hist(Final_dataset$Marriages)
+hist(Final_dataset$Stillbirths)
+hist(Final_dataset$Covid)
+```
+
+
+```{r}
+boxplot(Final_dataset$Births)
+boxplot(Final_dataset$Deaths)
+boxplot(Final_dataset$Marriages)
+boxplot(Final_dataset$Stillbirths)
+boxplot(Final_dataset$Covid)
+
+```
+
+```{r}
+eda_web_report(Final_dataset)
+```
